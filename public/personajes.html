@@ -4,8 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Personajes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrender/1.0.15/jsrender.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-serialize-object/2.5.0/jquery.serialize-object.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/navigo/8.11.1/navigo.min.js" referrerpolicy="no-referrer"></script>
+    <style>
+        .pixelated {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+    </style>
 </head>
 <body>
+
+<script id="plantillaPersonajes" type="text/x-jtemplate">
+    <table>
+        <tbody>
+        <tr>
+            <th>ID</th>
+            <th>NOMBRE</th>
+            <th>IMAGEN</th>
+            <th>VIDA</th>
+            <th>OBJETO</th>
+            <th>ACTIONS</th>
+        </tr>
+        {{for personajes}}
+        <tr>
+            <td>{{:id}}</td>
+            <td>{{:nombre}}</td>
+            <td><img src="{{:imagen}}" width="auto" height="120px" class="pixelated"></td>
+            <td>{{:~repeatImage(vida)}}</td>
+            <td><img src="{{:objeto}}" width="100px" height="auto" class="pixelated" title="{{:objetoNombre}}" alt="objeto"></td>
+            <td>
+                <a href="#" data-id="{{:id}}" class="modify btn btn-warning">Modify</a>
+                <a href="#" data-id="{{:id}}" class="delete btn btn-danger">Delete</a>
+            </td>
+        </tr>
+        {{/for}}
+        </tbody>
+    </table>
+</script>
+
+<div id="app"></div>
+
+<script>
+
+    $.views.helpers({
+        repeatImage: function(count){
+            let html = '';
+            for(i=0;i<count;i++){
+                html += '<img src="images/vida.png" alt="vida" width="60px" height="auto" class="pixelated">';
+            }
+            return html;
+        }
+    })
+
+    function deletePersonaje(event) {
+        event.preventDefault()
+
+        let id = $(this).data("id")
+
+        $.ajax({
+            url:'/api/personajes/' + id,
+            type: 'DELETE'
+        })
+        .then(function (result) {
+            showPersonajes()
+        })
+    }
+
+    function showPersonajes() {
+        $.getJSON('/api/personajesPlus', function (data) {
+            console.log("Personajes cargados: ", data);
+            let html =
+                $('#plantillaPersonajes').render(data)
+            $('#app').html(html)
+        })
+    }
+
+    $(document).ready(function () {
+        showPersonajes()
+        $('#app').on('click', '.delete', deletePersonaje)
+    })
+
+</script>
 
 </body>
 </html>

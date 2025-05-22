@@ -31,9 +31,10 @@ var db = require('knex')(
 
 
 // TODOS LOS GETS
+
 app.get('/api/personajes', function (req, res) {
-  db.select('p.ID', 'p.Nombre', 'p.ID_ObjetoInicial', 'p.Vida', 'p.Imagen')
-      .from('Personajes as p')
+  db.select('p.id', 'p.nombre', 'p.idObjetoInicial', 'p.vida', 'p.imagen')
+      .from('personajes as p')
       .then(function (data) {
         result = {};
         result.personajes = data;
@@ -43,16 +44,27 @@ app.get('/api/personajes', function (req, res) {
 
 app.get('/api/personajes/:id', function (req, res) {
   let personaje = parseInt(req.params.id);
-  db.select('p.ID', 'p.Nombre', 'p.ID_ObjetoInicial', 'p.Vida', 'p.Imagen')
-  .from('Personajes as p')
-      .where('p.ID', personaje)
+  db.select('p.id', 'p.nombre', 'p.idObjetoInicial', 'p.vida', 'p.imagen')
+  .from('personajes as p')
+      .where('p.id', personaje)
   .then(function (data) {
     res.json(data);
   })
 })
 
+app.get('/api/personajesPlus', function (req, res) {
+    db.select('p.id', 'p.nombre', 'p.idObjetoInicial', 'p.vida', 'p.imagen', 'o.nombre as objetoNombre', 'o.imagen as objeto')
+        .from('personajes as p')
+        .leftJoin('objetos as o', 'p.idObjetoInicial', 'o.id')
+        .then(function (data) {
+            result = {};
+            result.personajes = data;
+            res.json(result);
+        });
+})
+
 app.get('/api/objetos', function (req, res) {
-  db.select('o.ID', 'o.Nombre', 'o.Activo', 'o.Imagen','o.ID_Sala')
+  db.select('o.id', 'o.nombre', 'o.activo', 'o.imagen','o.idSala')
       .from('Objetos as o')
       .then(function (data) {
           result = {};
@@ -63,17 +75,17 @@ app.get('/api/objetos', function (req, res) {
 
 app.get('/api/objetos/:id', function (req, res) {
     let objeto = parseInt(req.params.id);
-    db.select('o.ID', 'o.Nombre', 'o.Activo', 'o.Imagen', 'o.ID_Sala')
-    .from('Objetos as o')
-        .where('o.ID', objeto)
+    db.select('o.id', 'o.nombre', 'o.activo', 'o.imagen', 'o.idSala')
+    .from('objetos as o')
+        .where('o.id', objeto)
     .then(function (data) {
         res.json(data);
     })
 })
 
 app.get('/api/habitaciones', function (req, res) {
-    db.select('h.ID', 'h.Nombre')
-    .from('Habitaciones as h')
+    db.select('h.id', 'h.nombre', 'h.imagen')
+    .from('habitaciones as h')
     .then(function (data) {
         result = {};
         result.habitaciones = data;
@@ -83,13 +95,50 @@ app.get('/api/habitaciones', function (req, res) {
 
 app.get('/api/habitaciones/:id', function (req, res) {
     let habitacion = parseInt(req.params.id);
-    db.select('h.ID', 'h.Nombre')
-    .from('Habitaciones as h')
-    .where('h.ID', habitacion)
+    db.select('h.id', 'h.nombre', 'h.imagen')
+    .from('habitaciones as h')
+    .where('h.id', habitacion)
     .then(function (data) {
         res.json(data);
     })
 })
+
+
+// TODOS LOS DELETES
+
+app.delete('/api/personajes/:id', function (req, res) {
+    let personaje = parseInt(req.params.id)
+
+    db.delete()
+        .from('personajes')
+        .where('id', personaje)
+        .then(function (data) {
+            res.json(data)
+        })
+})
+
+app.delete('/api/objetos/:id', function (req, res) {
+    let objeto = parseInt(req.params.id)
+
+    db.delete()
+        .from('objetos')
+        .where('id', objeto)
+        .then(function (data) {
+            res.json(data)
+        })
+})
+
+app.delete('/api/habitaciones/:id', function (req, res) {
+    let habitacion = parseInt(req.params.id)
+
+    db.delete()
+        .from('habitaciones')
+        .where('id', habitacion)
+        .then(function (data) {
+            res.json(data)
+        })
+})
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
